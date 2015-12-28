@@ -1,0 +1,31 @@
+{
+  "name": "better-css-delivery",
+  "description": "",
+  "main": "better-css-delivery.php",
+  "authors": [
+    "Primoz Cigler"
+  ],
+  "license": "GPL-2.0+",
+  "keywords": [
+    "wp",
+    "wordpress",
+    "plugin",
+    "loadCSS",
+    "FOUC",
+    "critical",
+    "rendering",
+    "path"
+  ],
+  "moduleType": [],
+  "homepage": "https://www.proteusthemes.com",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "loadcss": "~0.2.4"
+  }
+}
