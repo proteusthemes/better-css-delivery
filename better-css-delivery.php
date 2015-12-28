@@ -21,7 +21,7 @@ class BetterCSSDelivery  {
 	 * Array of handles which should be dequeued and loaded async with loadCSS
 	 * @var array
 	 */
-	protected $handles_to_dequeue;
+	protected $handles_loaded_async;
 
 	/**
 	 * Content URL property from WP_Styles class.
@@ -31,8 +31,16 @@ class BetterCSSDelivery  {
 
 	protected function __construct() {
 		// init properties
-		$this->handles_to_dequeue = array( 'structurepress-main', 'structurepress-woocommerce' );
-		$this->content_url        = wp_styles()->content_url;
+		$this->handles_loaded_async = array(
+			'wp-featherlight',
+			'structurepress-woocommerce',
+			'contact-form-7',
+			'select2',
+			'woocommerce-layout',
+			'woocommerce-general',
+			'ptss-style'
+		);
+		$this->content_url = wp_styles()->content_url;
 
 		// add wp hooks
 		add_action( 'wp_print_styles', array( $this, 'dequeue' ), 9 );
@@ -77,7 +85,7 @@ class BetterCSSDelivery  {
 	 * @return void
 	 */
 	public function dequeue() {
-		foreach ( $this->handles_to_dequeue as $handle ) {
+		foreach ( $this->handles_loaded_async as $handle ) {
 			wp_dequeue_style( $handle );
 		}
 	}
@@ -101,10 +109,9 @@ class BetterCSSDelivery  {
 		$out       = array();
 		$wp_styles = wp_styles();
 
-		foreach ( $this->handles_to_dequeue as $handle ) {
-			if ( array_key_exists( $handle, $wp_styles->registered ) ) {
+		foreach ( $wp_styles->to_do as $handle ) {
+			if ( in_array( $handle, $this->handles_loaded_async ) ) {
 				$style = $wp_styles->registered[ $handle ];
-
 				$out[] = $this->css_href( $style->src, $style->ver, $wp_styles->base_url );
 			}
 		}
