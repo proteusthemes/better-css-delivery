@@ -1,4 +1,4 @@
-=== Better-css-delivery ===
+=== Better CSS Delivery ===
 Contributors: cyman
 Tags: css, frontend
 Requires at least: 4.0

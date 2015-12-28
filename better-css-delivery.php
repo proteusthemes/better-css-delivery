@@ -1,7 +1,7 @@
 <?php
 /*
-Plugin Name: Better-css-delivery
-Version: 0.1-alpha
+Plugin Name: Better CSS Delivery
+Version: 0.1.0
 Description: Improves loading of CSS assets, utilizing modern approaches like critical CSS and loadCSS
 Author: Primoz Cigler
 Author URI: https://www.proteusthemes.com/
@@ -83,8 +83,8 @@ class BetterCSSDelivery  {
 	}
 
 	/**
-	 * LoadCSS function
-	 * @return [type] [description]
+	 * Where the magic happens. Prints loadCSS JS function in the head of the page
+	 * and loads the stylesheets asynchronously.
 	 */
 	public function loadCSS() {
 		?>
