@@ -10,7 +10,7 @@ Text Domain: better-css-delivery
 Domain Path: /languages
 */
 
-class BetterCSSDelivery  {
+class BetterCSSDelivery {
 	/**
 	 * Single instance of this class
 	 * @var BetterCSSDelivery
