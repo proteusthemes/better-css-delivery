@@ -42,12 +42,12 @@ class BetterCSSDelivery {
 			'contact-form-7',
 			'woocommerce-layout',
 			'woocommerce-general',
-			'ptss-style'
+			'woocommerce-smallscreen'
 		);
 
 		// add wp hooks
-		add_action( 'wp_print_styles', array( $this, 'dequeue' ), 9 );
 		add_action( 'wp_print_styles', array( $this, 'loadCSS' ) );
+		add_filter( 'style_loader_tag', array( $this, 'style_loader_tag' ), 10, 3 );
 
 		// conditionally print debug information in the foot
 		if ( true === filter_input( INPUT_GET, 'debugBCD', FILTER_VALIDATE_BOOLEAN ) ) {
@@ -83,28 +83,26 @@ class BetterCSSDelivery {
 	}
 
 	/**
-	 * Dequeue some CSS
-	 * @return void
-	 */
-	public function dequeue() {
-		foreach ( $this->handles_loaded_async as $handle ) {
-			wp_dequeue_style( $handle );
-		}
-	}
-
-	/**
 	 * Where the magic happens. Prints loadCSS JS function in the head of the page
 	 * and loads the stylesheets asynchronously.
 	 */
 	public function loadCSS() {
-		?>
-		<script type="text/javascript">
-			(function(w){"use strict";var loadCSS=function(href,before,media){var doc=w.document;var ss=doc.createElement("link");var ref;if(before){ref=before}else{var refs=(doc.body||doc.getElementsByTagName("head")[0]).childNodes;ref=refs[refs.length-1]}var sheets=doc.styleSheets;ss.rel="stylesheet";ss.href=href;ss.media="only x";ref.parentNode.insertBefore(ss,before?ref:ref.nextSibling);var onloadcssdefined=function(cb){var resolvedHref=ss.href;var i=sheets.length;while(i--){if(sheets[i].href===resolvedHref){return cb()}}setTimeout(function(){onloadcssdefined(cb)})};ss.onloadcssdefined=onloadcssdefined;onloadcssdefined(function(){ss.media=media||"all"});return ss};if(typeof module!=="undefined"){module.exports=loadCSS}else{w.loadCSS=loadCSS}})(typeof global!=="undefined"?global:this);
-		<?php
-			printf( "loadCSS('%s');", implode("');loadCSS('", $this->loaded_with_loadCSS() ) );
-		?>
-		</script>
-		<?
+		echo PHP_EOL;
+		?><script type="text/javascript">(function(w){"use strict";var loadCSS=function(href,before,media){var doc=w.document;var ss=doc.createElement("link");var ref;if(before){ref=before}else{var refs=(doc.body||doc.getElementsByTagName("head")[0]).childNodes;ref=refs[refs.length-1]}var sheets=doc.styleSheets;ss.rel="stylesheet";ss.href=href;ss.media="only x";ref.parentNode.insertBefore(ss,before?ref:ref.nextSibling);var onloadcssdefined=function(cb){var resolvedHref=ss.href;var i=sheets.length;while(i--){if(sheets[i].href===resolvedHref){return cb()}}setTimeout(function(){onloadcssdefined(cb)})};ss.onloadcssdefined=onloadcssdefined;onloadcssdefined(function(){ss.media=media||"all"});return ss};if(typeof module!=="undefined"){module.exports=loadCSS}else{w.loadCSS=loadCSS}})(typeof global!=="undefined"?global:this);</script><?
+		echo PHP_EOL;
+	}
+
+	public function style_loader_tag( $tag, $handle, $href ) {
+		if ( in_array( $handle, $this->handles_loaded_async ) ) {
+			if ( isset( $this->wp_styles->registered[ $handle ]->args ) ) {
+				$media = esc_attr( $this->wp_styles->registered[ $handle ]->args );
+			} else {
+				$media = 'all';
+			}
+			return "<script id='${handle}-loadcss'>loadCSS('$href', false, '$media' );</script>\n";
+		}
+
+		return $tag;
 	}
 
 	protected function loaded_with_loadCSS() {
