@@ -46,8 +46,9 @@ class BetterCSSDelivery  {
 		add_action( 'wp_print_styles', array( $this, 'dequeue' ), 9 );
 		add_action( 'wp_print_styles', array( $this, 'loadCSS' ) );
 
+		// conditionally print debug information in the foot
 		if ( true === filter_input( INPUT_GET, 'debugBCD', FILTER_VALIDATE_BOOLEAN ) ) {
-			add_action( 'wp_footer', array( $this, 'footer_debug' ), 99 );
+			add_action( 'wp_footer', array( $this, 'footer_debug' ), 9999 );
 		}
 	}
 
