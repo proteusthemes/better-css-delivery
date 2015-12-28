@@ -18,19 +18,24 @@ class BetterCSSDelivery  {
 	private static $instance;
 
 	/**
+	 * Reference to WP_Styles
+	 * @var WP_Styles
+	 */
+	private $wp_styles;
+
+	/**
 	 * Array of handles which should be dequeued and loaded async with loadCSS
 	 * @var array
 	 */
 	protected $handles_loaded_async;
 
 	/**
-	 * Content URL property from WP_Styles class.
-	 * @var string
+	 * Init
 	 */
-	protected $content_url;
-
 	protected function __construct() {
 		// init properties
+		$this->wp_styles = wp_styles();
+
 		$this->handles_loaded_async = array(
 			'wp-featherlight',
 			'structurepress-woocommerce',
@@ -40,7 +45,6 @@ class BetterCSSDelivery  {
 			'woocommerce-general',
 			'ptss-style'
 		);
-		$this->content_url = wp_styles()->content_url;
 
 		// add wp hooks
 		add_action( 'wp_print_styles', array( $this, 'dequeue' ), 9 );
@@ -70,12 +74,10 @@ class BetterCSSDelivery  {
 	 * https://developer.wordpress.org/reference/functions/wp_styles/
 	 */
 	public function footer_debug() {
-		$wp_styles = wp_styles();
-
 		printf( '<!--%1$sRegistered and enqueued styles.%1$sFormat:%1$s| Enqueued? | <handle> | <URL>%1$s', PHP_EOL );
 
-		foreach ( $wp_styles->registered as $handle => $style ) {
-			printf( '| %s | %-30s | %s%s', in_array( $handle, $wp_styles->queue ) ? 'x' : ' ', $handle, $this->css_href( $style->src, $style->ver, $wp_styles->base_url ), PHP_EOL );
+		foreach ( $this->wp_styles->registered as $handle => $style ) {
+			printf( '| %s | %-30s | %s%s', in_array( $handle, $this->wp_styles->queue ) ? 'x' : ' ', $handle, $this->css_href( $style->src, $style->ver, $this->wp_styles->base_url ), PHP_EOL );
 		}
 
 		echo '-->' . PHP_EOL;
@@ -107,13 +109,12 @@ class BetterCSSDelivery  {
 	}
 
 	protected function loaded_with_loadCSS() {
-		$out       = array();
-		$wp_styles = wp_styles();
+		$out = array();
 
-		foreach ( $wp_styles->to_do as $handle ) {
+		foreach ( $this->wp_styles->to_do as $handle ) {
 			if ( in_array( $handle, $this->handles_loaded_async ) ) {
-				$style = $wp_styles->registered[ $handle ];
-				$out[] = $this->css_href( $style->src, $style->ver, $wp_styles->base_url );
+				$style = $this->wp_styles->registered[ $handle ];
+				$out[] = $this->css_href( $style->src, $style->ver, $this->wp_styles->base_url );
 			}
 		}
 
@@ -126,7 +127,7 @@ class BetterCSSDelivery  {
 	 * @return url
 	 */
 	protected function css_href( $src, $ver, $base_url ) {
-		if ( ! is_bool( $src ) && ! preg_match( '|^(https?:)?//|', $src ) && ! ( $this->content_url && 0 === strpos( $src, $this->content_url ) ) ) {
+		if ( ! is_bool( $src ) && ! preg_match( '|^(https?:)?//|', $src ) && ! ( $this->wp_styles->content_url && 0 === strpos( $src, $this->wp_styles->content_url ) ) ) {
 			$src = $base_url . $src;
 		}
 
