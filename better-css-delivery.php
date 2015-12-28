@@ -88,7 +88,7 @@ class BetterCSSDelivery {
 	 */
 	public function loadCSS() {
 		echo PHP_EOL;
-		?><script type="text/javascript">(function(w){"use strict";var loadCSS=function(href,before,media){var doc=w.document;var ss=doc.createElement("link");var ref;if(before){ref=before}else{var refs=(doc.body||doc.getElementsByTagName("head")[0]).childNodes;ref=refs[refs.length-1]}var sheets=doc.styleSheets;ss.rel="stylesheet";ss.href=href;ss.media="only x";ref.parentNode.insertBefore(ss,before?ref:ref.nextSibling);var onloadcssdefined=function(cb){var resolvedHref=ss.href;var i=sheets.length;while(i--){if(sheets[i].href===resolvedHref){return cb()}}setTimeout(function(){onloadcssdefined(cb)})};ss.onloadcssdefined=onloadcssdefined;onloadcssdefined(function(){ss.media=media||"all"});return ss};if(typeof module!=="undefined"){module.exports=loadCSS}else{w.loadCSS=loadCSS}})(typeof global!=="undefined"?global:this);</script><?
+		?><script type="text/javascript">(function(w){"use strict";var loadCSS=function(href,before,media){var doc=w.document;var ss=doc.createElement("link");var ref;if(before){ref=before}else{var refs=(doc.body||doc.getElementsByTagName("head")[0]).childNodes;ref=refs[refs.length-1]}var sheets=doc.styleSheets;ss.rel="stylesheet";ss.href=href;ss.media="only x";ref.parentNode.insertBefore(ss,before?ref:ref.nextSibling);var onloadcssdefined=function(cb){var resolvedHref=ss.href;var i=sheets.length;while(i--){if(sheets[i].href===resolvedHref){return cb()}}setTimeout(function(){onloadcssdefined(cb)})};ss.onloadcssdefined=onloadcssdefined;onloadcssdefined(function(){ss.media=media||"all"});return ss};if(typeof module!=="undefined"){module.exports=loadCSS}else{w.loadCSS=loadCSS}})(typeof global!=="undefined"?global:this);</script><?php
 		echo PHP_EOL;
 	}
 
@@ -99,23 +99,10 @@ class BetterCSSDelivery {
 			} else {
 				$media = 'all';
 			}
-			return "<script id='${handle}-loadcss'>loadCSS('$href', false, '$media' );</script>\n";
+			return "<script id='$handle-loadcss'>loadCSS('$href', false, '$media' );</script>\n";
 		}
 
 		return $tag;
-	}
-
-	protected function loaded_with_loadCSS() {
-		$out = array();
-
-		foreach ( $this->handles_loaded_async as $handle ) {
-			// if ( in_array( $handle, $this->handles_loaded_async ) ) {
-				$style = $this->wp_styles->registered[ $handle ];
-				$out[] = $this->css_href( $style->src, $style->ver, $this->wp_styles->base_url );
-			// }
-		}
-
-		return $out;
 	}
 
 	/**
