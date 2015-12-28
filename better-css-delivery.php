@@ -11,15 +11,36 @@ Domain Path: /languages
 */
 
 class BetterCSSDelivery  {
+	/**
+	 * Single instance of this class
+	 * @var BetterCSSDelivery
+	 */
 	private static $instance;
 
+	/**
+	 * Array of handles which should be dequeued and loaded async with loadCSS
+	 * @var array
+	 */
 	protected $handles_to_dequeue;
 
-	protected function __construct() {
-		$this->handles_to_dequeue = array( 'structurepress-main', 'structurepress-woocommerce' );
+	/**
+	 * Content URL property from WP_Styles class.
+	 * @var string
+	 */
+	protected $content_url;
 
-		add_action( 'wp_print_styles', array( $this, 'dequeue' ) );
-		add_action( 'wp_footer', array( $this, 'footer_debug' ), 99 );
+	protected function __construct() {
+		// init properties
+		$this->handles_to_dequeue = array( 'structurepress-main', 'structurepress-woocommerce' );
+		$this->content_url        = wp_styles()->content_url;
+
+		// add wp hooks
+		add_action( 'wp_print_styles', array( $this, 'dequeue' ), 9 );
+		add_action( 'wp_print_styles', array( $this, 'loadCSS' ) );
+
+		if ( true === filter_input( INPUT_GET, 'debugBCD', FILTER_VALIDATE_BOOLEAN ) ) {
+			add_action( 'wp_footer', array( $this, 'footer_debug' ), 99 );
+		}
 	}
 
 	/**
@@ -34,14 +55,78 @@ class BetterCSSDelivery  {
 		return static::$instance;
 	}
 
+	/**
+	 * Print debug information in the footer as HTML comment
+	 *
+	 * https://developer.wordpress.org/reference/functions/wp_styles/
+	 */
 	public function footer_debug() {
-		print_r( wp_styles() );
+		$wp_styles = wp_styles();
+
+		printf( '<!--%1$sRegistered and enqueued styles.%1$sFormat:%1$s| Enqueued? | <handle> | <URL>%1$s', PHP_EOL );
+
+		foreach ( $wp_styles->registered as $handle => $style ) {
+			printf( '| %s | %-30s | %s%s', in_array( $handle, $wp_styles->queue ) ? 'x' : ' ', $handle, $this->css_href( $style->src, $style->ver, $wp_styles->base_url ), PHP_EOL );
+		}
+
+		echo '-->' . PHP_EOL;
 	}
 
+	/**
+	 * Dequeue some CSS
+	 * @return void
+	 */
 	public function dequeue() {
 		foreach ( $this->handles_to_dequeue as $handle ) {
 			wp_dequeue_style( $handle );
 		}
+	}
+
+	/**
+	 * LoadCSS function
+	 * @return [type] [description]
+	 */
+	public function loadCSS() {
+		?>
+		<script type="text/javascript">
+			(function(w){"use strict";var loadCSS=function(href,before,media){var doc=w.document;var ss=doc.createElement("link");var ref;if(before){ref=before}else{var refs=(doc.body||doc.getElementsByTagName("head")[0]).childNodes;ref=refs[refs.length-1]}var sheets=doc.styleSheets;ss.rel="stylesheet";ss.href=href;ss.media="only x";ref.parentNode.insertBefore(ss,before?ref:ref.nextSibling);var onloadcssdefined=function(cb){var resolvedHref=ss.href;var i=sheets.length;while(i--){if(sheets[i].href===resolvedHref){return cb()}}setTimeout(function(){onloadcssdefined(cb)})};ss.onloadcssdefined=onloadcssdefined;onloadcssdefined(function(){ss.media=media||"all"});return ss};if(typeof module!=="undefined"){module.exports=loadCSS}else{w.loadCSS=loadCSS}})(typeof global!=="undefined"?global:this);
+		<?php
+			printf( "loadCSS('%s');", implode("');loadCSS('", $this->loaded_with_loadCSS() ) );
+		?>
+		</script>
+		<?
+	}
+
+	protected function loaded_with_loadCSS() {
+		$out       = array();
+		$wp_styles = wp_styles();
+
+		foreach ( $this->handles_to_dequeue as $handle ) {
+			if ( array_key_exists( $handle, $wp_styles->registered ) ) {
+				$style = $wp_styles->registered[ $handle ];
+
+				$out[] = $this->css_href( $style->src, $style->ver, $wp_styles->base_url );
+			}
+		}
+
+		return $out;
+	}
+
+	/**
+	 * Similar to https://developer.wordpress.org/reference/classes/wp_styles/_css_href/
+	 *
+	 * @return url
+	 */
+	protected function css_href( $src, $ver, $base_url ) {
+		if ( ! is_bool( $src ) && ! preg_match( '|^(https?:)?//|', $src ) && ! ( $this->content_url && 0 === strpos( $src, $this->content_url ) ) ) {
+			$src = $base_url . $src;
+		}
+
+		if ( ! empty( $ver ) ) {
+			$src = add_query_arg( 'ver', $ver, $src );
+		}
+
+		return esc_url( $src );
 	}
 }
 
