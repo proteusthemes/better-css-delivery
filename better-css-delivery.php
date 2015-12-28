@@ -40,7 +40,6 @@ class BetterCSSDelivery  {
 			'wp-featherlight',
 			'structurepress-woocommerce',
 			'contact-form-7',
-			'select2',
 			'woocommerce-layout',
 			'woocommerce-general',
 			'ptss-style'
@@ -111,11 +110,11 @@ class BetterCSSDelivery  {
 	protected function loaded_with_loadCSS() {
 		$out = array();
 
-		foreach ( $this->wp_styles->to_do as $handle ) {
-			if ( in_array( $handle, $this->handles_loaded_async ) ) {
+		foreach ( $this->handles_loaded_async as $handle ) {
+			// if ( in_array( $handle, $this->handles_loaded_async ) ) {
 				$style = $this->wp_styles->registered[ $handle ];
 				$out[] = $this->css_href( $style->src, $style->ver, $this->wp_styles->base_url );
-			}
+			// }
 		}
 
 		return $out;
