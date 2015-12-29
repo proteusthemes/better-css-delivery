@@ -10,6 +10,11 @@ Text Domain: better-css-delivery
 Domain Path: /languages
 */
 
+
+if ( is_admin() ) { // TODO check capabilities
+	require_once __DIR__ . '/admin.php';
+}
+
 class BetterCSSDelivery {
 	/**
 	 * Single instance of this class
