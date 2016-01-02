@@ -11,9 +11,8 @@ Domain Path: /languages
 */
 
 
-if ( is_admin() ) { // TODO check capabilities
+if ( is_admin() ) {
 	require_once __DIR__ . '/inc/admin.php';
-
 	BetterCSSDeliveryAdmin::get_instance();
 }
 
