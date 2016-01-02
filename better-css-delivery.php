@@ -111,6 +111,7 @@ class BetterCSSDelivery {
 
 	public function print_critical_css() {
 		printf( '<style type="text/css">%s</style>', $this->critical_css );
+		echo PHP_EOL;
 	}
 
 	/**
