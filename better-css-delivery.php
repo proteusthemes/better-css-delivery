@@ -42,18 +42,16 @@ class BetterCSSDelivery {
 		// init properties
 		$this->wp_styles = wp_styles();
 
-		$this->handles_loaded_async = array(
-			'wp-featherlight',
-			'structurepress-woocommerce',
-			'contact-form-7',
-			'woocommerce-layout',
-			'woocommerce-general',
-			'woocommerce-smallscreen'
-		);
+		$this->handles_loaded_async = get_option( 'bcd-css-handles', array() );
+		$this->critical_css         = get_option( 'bcd-critical-css', '' );
 
 		// add wp hooks
 		add_action( 'wp_print_styles', array( $this, 'loadCSS' ) );
 		add_filter( 'style_loader_tag', array( $this, 'style_loader_tag' ), 10, 3 );
+
+		if ( strlen( $this->critical_css ) ) {
+			add_action( 'wp_print_styles', array( $this, 'print_critical_css' ) );
+		}
 
 		// conditionally print debug information in the foot
 		if ( true === filter_input( INPUT_GET, 'debugBCD', FILTER_VALIDATE_BOOLEAN ) ) {
@@ -109,6 +107,10 @@ class BetterCSSDelivery {
 		}
 
 		return $tag;
+	}
+
+	public function print_critical_css() {
+		printf( '<style type="text/css">%s</style>', $this->critical_css );
 	}
 
 	/**
