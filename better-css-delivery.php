@@ -12,7 +12,9 @@ Domain Path: /languages
 
 
 if ( is_admin() ) { // TODO check capabilities
-	require_once __DIR__ . '/admin.php';
+	require_once __DIR__ . '/inc/admin.php';
+
+	BetterCSSDeliveryAdmin::get_instance();
 }
 
 class BetterCSSDelivery {
