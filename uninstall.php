@@ -12,6 +12,7 @@ $bcd_options = array(
 	'bcd-critical-css',
 );
 
-foreach ( $bcd_options as $option ) {
+foreach ( $bcd_options as $option_name ) {
 	delete_option( $option_name );
+	delete_site_option( $option_name );
 }
