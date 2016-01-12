@@ -42,13 +42,17 @@ class BetterCSSDeliveryAdmin {
 	 */
 	public function admin_init() {
 		// register settings
-		register_setting( 'bcd', 'bcd-css-handles', function ( $csv_handles ) {
+		register_setting( 'bcd', 'bcd-css-handles', function ( $handles_br ) {
+			if ( is_array( $handles_br ) ) {
+				return $handles_br;
+			}
+
 			return array_filter(
 				array_map(
 					function ( $handle ) {
 						return sanitize_key( $handle );
 					},
-					explode( "\n", $csv_handles )
+					explode( "\n", $handles_br )
 				),
 				'strlen'
 			);
